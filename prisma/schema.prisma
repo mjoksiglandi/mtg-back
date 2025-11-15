@@ -1,0 +1,65 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Game {
+  id                   String             @id @default(cuid())
+  code                 String             @unique
+  format               String
+  startingLifePlayer   Int
+  startingLifeTeam     Int?
+  useCommanderDamage   Boolean
+  commanderDamageLimit Int
+  usePoison            Boolean
+  poisonLimit          Int
+  isFinished           Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  players          Player[]
+  teams            Team[]
+  commanderDamage  CommanderDamage[]
+}
+
+model Player {
+  id       String  @id @default(cuid())
+
+  game     Game    @relation(fields: [gameId], references: [id])
+  gameId   String
+
+  name     String
+  team     Team?   @relation(fields: [teamId], references: [id])
+  teamId   String?
+
+  life     Int
+  poison   Int
+  isAlive  Boolean @default(true)
+}
+
+model Team {
+  id       String  @id @default(cuid())
+
+  game     Game    @relation(fields: [gameId], references: [id])
+  gameId   String
+
+  name     String
+  life     Int?
+
+  players  Player[]
+}
+
+model CommanderDamage {
+  id           String  @id @default(cuid())
+
+  game         Game    @relation(fields: [gameId], references: [id])
+  gameId       String
+
+  fromPlayerId String
+  toPlayerId   String
+  damage       Int
+}
